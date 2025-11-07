@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<style>
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  background: #060AB2;
+}
+
+.memoryGame {
+  width: 480px;
+  height: 320px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  perspective: 1000px;
+}
+
+.memoryCards {
+  width: calc(33.333% - 10px);
+  height: calc(50% - 10px);
+  margin: 5px;
+  position: relative;
+  transform: scale(1);
+  transform-style: preserve-3d;
+  transition: transform .5s;
+  box-shadow: 1px 1px 1px rgba(0,0,0,.3);
+}
+
+.memoryCards:active {
+  transform: scale(0.97);
+  transition: transform .1s;
+}
+
+.memoryCards.flip {
+  transform: rotateY(180deg);
+}
+
+.front-face,
+.back-face {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  position: absolute;
+  border-radius: 5px;
+  background: #1C7CCC;
+  backface-visibility: hidden;
+}
+
+.front-face {
+  transform: rotateY(180deg);
+}
+</style>
+
+<html>
+  <body style="background-color: black;">
+    <section class="memoryGame">
+        <div class="memoryCards" data-value="js">
+          <img class="back-face" src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Aurelia" />
+          <img class="front-face" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwCV6pkoBzfVUeYqCGwtx7_LHWPu2FXjEGOA&s" alt="JS" />
+        </div>
+        <div class="memoryCards" data-value="js">
+          <img class="back-face"  src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Aurelia" />
+          <img class="front-face"src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwCV6pkoBzfVUeYqCGwtx7_LHWPu2FXjEGOA&s" alt="JS" />
+        </div>
+    
+        <div class="memoryCards" data-value="vue">
+          <img class="back-face"  src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Vue" />
+          <img class="front-face"src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/1200px-Vue.js_Logo_2.svg.png" alt="Vue" />
+        </div>
+        <div class="memoryCards" data-value="vue">
+          <img class="back-face"  src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Vue" />
+          <img class="front-face"src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/1200px-Vue.js_Logo_2.svg.png" alt="Vue" />
+        </div>
+		
+		<div class="memoryCards" data-value="react">
+          <img class="back-face"  src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Vue" />
+          <img class="front-face"src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7XCnlkMKmCQJFdwI28q3_ahpEMcpO0g60fA&s" alt="React" />
+        </div>
+        <div class="memoryCards" data-value="react">
+          <img class="back-face"  src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png" alt="Vue" />
+          <img class="front-face"src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7XCnlkMKmCQJFdwI28q3_ahpEMcpO0g60fA&s" alt="React" />
+        </div>
+    </section>
+  
+  </body>
+  
+    <script>
+const cards = document.querySelectorAll(".memoryCards");
+
+// Did this to make sure cards are being "caught"
+//console.log(cards);
+
+let isFlipped = false;
+let completedBoard = false;
+let firstCard;
+let secondCard;
+
+//Start the game when the page loads. 
+window.onload = function() 
+{
+  shuffle();
+};
+
+// This is when the card is flipped
+function flipCard()
+{
+//If the user completes the game then it will not allow them to flip the cards
+  if(completedBoard)
+  {
+    console.log("completed");
+    return;
+  }
+  
+  //If the 2nd card matches the first card
+  if(this==firstCard)
+  {
+    //console.log("cards match");
+    return;
+  }
+  
+  //If not then it means the first card is selected and we add the class flip to it
+  this.classList.add('flip');
+  
+  // If no card is flipped then we make make make the firstCard var equal to that data-value
+  if(!isFlipped)
+  {
+    //console.log("is not flipped");
+    isFlipped = true;
+    firstCard = this;
+    
+    return;
+  }
+  
+  secondCard = this;
+  isMatch(); //Check for the matching card 
+}
+
+function isMatch()
+{
+  let isMatched;
+  
+  //Check by checking the data-value
+  isMatched = firstCard.dataset.value === secondCard.dataset.value;
+
+  if(isMatched)
+  {
+    //console.log("matched a set");
+    disableCards(); //Disable the cards so user can't flip the matched cards
+    
+  }
+  else
+  {
+    //console.log("unflipping cards");
+    unflipCards(); //If not the same then unflip it
+  }
+  
+}
+
+function disableCards()
+{
+  //Remove the click event when disableCards is called from above
+  firstCard.removeEventListener("click", flipCard);
+  secondCard.removeEventListener("click", flipCard);
+  
+  resetCards();
+}
+
+function unflipCards()
+{
+  //Stops the game from being played while the wrong cards are being flipped
+  completedBoard = true;
+  
+  // After 500ms/0.5s then flip the cards to the question mark
+  setTimeout(() =>
+  {
+    firstCard.classList.remove('flip');
+    secondCard.classList.remove('flip');
+    
+    resetCards();
+  }, 500);
+  
+}
+
+function resetCards()
+{
+  //console.log("reset");
+  
+  isFlipped = false;
+  completedBoard = false;  
+  
+  firstCard = null;
+  secondCard = null;
+  
+}
+
+//This function is called to randomize the placement of the cards
+function shuffle()
+{
+  cards.forEach(card  => 
+  {
+    console.log("shuffle");
+    let randomPos = Math.floor(Math.random() * 6);
+    
+    card.style.order = randomPos;
+  });
+}
+
+//Add the onclick event when the program starts
+cards.forEach(card => card.addEventListener('click', flipCard));
+
+
+cards.forEach(card => card.addEventListener('click', flipCard));
+	</script>
+</html>
